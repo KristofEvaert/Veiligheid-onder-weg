@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Veiligheid op de Weg - AI Q&A</title>
+    <link rel="stylesheet" href="qa-styles.css">
+    <script src="https://unpkg.com/@tensorflow/tfjs@4.10.0/dist/tf.min.js"></script>
+    <script src="https://unpkg.com/@tensorflow-models/universal-sentence-encoder@1.3.3/dist/universal-sentence-encoder.min.js"></script>
+    <script>
+        // Simple TensorFlow.js based Q&A system
+        window.tfReady = false;
+        
+        // Wait for TensorFlow.js to load
+        window.addEventListener('load', async function() {
+            console.log('TensorFlow.js loaded, initializing...');
+            window.tfReady = true;
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🛣️ Veiligheid op de Weg</h1>
+            <p>AI Q&A Systeem - Stel vragen over verkeersveiligheid</p>
+        </header>
+
+        <div class="main-content">
+            <!-- AI Model Status -->
+            <section class="model-section">
+                <h2>🧠 AI Model Status</h2>
+                <div id="modelStatus" class="status loading">
+                    <div class="loading-spinner"></div>
+                    Model wordt geladen...
+                </div>
+                <div id="knowledgeInfo" class="knowledge-info" style="display: none;">
+                    <p><strong>Kennisbank:</strong> <span id="documentCount">0</span> documenten geladen</p>
+                    <p><strong>Status:</strong> <span id="modelStatusText">Klaar voor vragen</span></p>
+                </div>
+            </section>
+
+            <!-- Q&A Section -->
+            <section class="qa-section">
+                <h2>❓ Stel je Vraag</h2>
+                <div class="question-area">
+                    <textarea id="questionInput" placeholder="Wat wil je weten over verkeersveiligheid? Bijvoorbeeld: 'Wat zijn de snelheidslimieten in woonwijken?'"></textarea>
+                    <button id="askBtn" disabled>Vraag Stellen</button>
+                </div>
+                <div id="answer" class="answer-area"></div>
+            </section>
+
+            <!-- Example Questions -->
+            <section class="examples-section">
+                <h2>💡 Voorbeeld Vragen</h2>
+                <div class="example-questions">
+                    <button class="example-btn" onclick="fillQuestion('Wat zijn de snelheidslimieten in woonwijken?')">
+                        Snelheidslimieten in woonwijken
+                    </button>
+                    <button class="example-btn" onclick="fillQuestion('Wanneer moet je voorrang verlenen?')">
+                        Voorrangsregels
+                    </button>
+                    <button class="example-btn" onclick="fillQuestion('Wat zijn de regels voor fietsers?')">
+                        Fietsregels
+                    </button>
+                    <button class="example-btn" onclick="fillQuestion('Hoe werkt de verkeersdrempel?')">
+                        Verkeersdrempels
+                    </button>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script src="qa-script.js"></script>
+</body>
+</html>

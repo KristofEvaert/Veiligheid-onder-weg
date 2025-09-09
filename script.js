@@ -1,11 +1,41 @@
-class LocalAIQASystem {
+class VeiligheidQA {
     constructor() {
-        this.knowledgeBase = this.loadKnowledgeBase();
+        this.knowledgeBase = [];
         this.model = null;
         this.modelLoaded = false;
         this.initializeEventListeners();
-        this.updateKnowledgeDisplay();
+        this.loadKnowledgeBase();
         this.loadModel();
+    }
+
+    async loadKnowledgeBase() {
+        try {
+            console.log('Loading knowledge base...');
+            const response = await fetch('/api/knowledge');
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const data = await response.json();
+            this.knowledgeBase = data.documents || [];
+            
+            console.log(`Knowledge base loaded: ${this.knowledgeBase.length} documents`);
+            
+            // Update UI
+            document.getElementById('documentCount').textContent = this.knowledgeBase.length;
+            document.getElementById('knowledgeInfo').style.display = 'block';
+            
+            if (this.knowledgeBase.length === 0) {
+                this.showStatus('Geen documenten gevonden in kennisbank', 'error');
+            } else {
+                this.showStatus(`Kennisbank geladen: ${this.knowledgeBase.length} documenten beschikbaar`, 'success');
+            }
+            
+        } catch (error) {
+            console.error('Error loading knowledge base:', error);
+            this.showStatus(`Fout bij laden kennisbank: ${error.message}`, 'error');
+        }
     }
 
     async loadModel() {
@@ -32,6 +62,7 @@ class LocalAIQASystem {
             this.modelLoaded = true;
             this.showStatus('AI model geladen en klaar voor gebruik!', 'success');
             document.getElementById('askBtn').disabled = false;
+            document.getElementById('modelStatusText').textContent = 'Klaar voor vragen';
             
         } catch (error) {
             console.error('Model loading error:', error);
@@ -40,25 +71,7 @@ class LocalAIQASystem {
     }
 
     initializeEventListeners() {
-        document.getElementById('processBtn').addEventListener('click', () => this.processDocuments());
-        document.getElementById('addUrlBtn').addEventListener('click', () => this.addUrl());
         document.getElementById('askBtn').addEventListener('click', () => this.askQuestion());
-        document.getElementById('fileInput').addEventListener('change', (e) => this.handleFileUpload(e));
-        
-        // Drag and drop support
-        const fileLabel = document.querySelector('.file-label');
-        fileLabel.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            fileLabel.classList.add('dragover');
-        });
-        fileLabel.addEventListener('dragleave', () => {
-            fileLabel.classList.remove('dragover');
-        });
-        fileLabel.addEventListener('drop', (e) => {
-            e.preventDefault();
-            fileLabel.classList.remove('dragover');
-            this.handleFileUpload({ target: { files: e.dataTransfer.files } });
-        });
         
         // Enter key support
         document.getElementById('questionInput').addEventListener('keypress', (e) => {
@@ -68,304 +81,6 @@ class LocalAIQASystem {
         });
     }
 
-
-    // File Upload Handler
-    async handleFileUpload(event) {
-        const files = event.target.files;
-        if (!files || files.length === 0) return;
-
-        this.showStatus('Bestanden worden verwerkt...', 'loading');
-
-        try {
-            for (let file of files) {
-                const content = await this.extractTextFromFile(file);
-                
-                const knowledgeItem = {
-                    id: Date.now().toString() + Math.random(),
-                    content: content,
-                    source: `📄 ${file.name}`,
-                    timestamp: new Date().toISOString()
-                };
-
-                this.knowledgeBase.push(knowledgeItem);
-            }
-
-            this.saveKnowledgeBase();
-            this.updateKnowledgeDisplay();
-            this.showStatus(`${files.length} bestand(en) succesvol verwerkt!`, 'success');
-            
-            // Clear file input
-            document.getElementById('fileInput').value = '';
-        } catch (error) {
-            this.showStatus(`Fout bij verwerken bestanden: ${error.message}`, 'error');
-        }
-    }
-
-    // Extract text from different file types
-    async extractTextFromFile(file) {
-        const fileType = file.type;
-        const fileName = file.name.toLowerCase();
-
-        if (fileName.endsWith('.pdf')) {
-            return await this.extractTextFromPDF(file);
-        } else if (fileName.endsWith('.txt')) {
-            return await this.extractTextFromTXT(file);
-        } else if (fileName.endsWith('.doc') || fileName.endsWith('.docx')) {
-            return await this.extractTextFromDOC(file);
-        } else {
-            throw new Error(`Bestandstype niet ondersteund: ${fileType}`);
-        }
-    }
-
-    async extractTextFromPDF(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                try {
-                    const arrayBuffer = e.target.result;
-                    const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
-                    let fullText = '';
-                    
-                    // Extract text from all pages
-                    for (let i = 1; i <= pdf.numPages; i++) {
-                        const page = await pdf.getPage(i);
-                        const textContent = await page.getTextContent();
-                        const pageText = textContent.items.map(item => item.str).join(' ');
-                        fullText += pageText + '\n';
-                    }
-                    
-                    resolve(fullText.trim());
-                } catch (error) {
-                    reject(new Error(`PDF parsing fout: ${error.message}`));
-                }
-            };
-            reader.onerror = reject;
-            reader.readAsArrayBuffer(file);
-        });
-    }
-
-    async extractTextFromTXT(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                resolve(e.target.result);
-            };
-            reader.onerror = reject;
-            reader.readAsText(file, 'UTF-8');
-        });
-    }
-
-    async extractTextFromDOC(file) {
-        // For DOC/DOCX files, we'd need a library like mammoth.js
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const text = "DOC/DOCX bestand geüpload. Voor volledige ondersteuning is een DOC parser library nodig.";
-                resolve(text);
-            };
-            reader.onerror = reject;
-            reader.readAsText(file);
-        });
-    }
-
-    // Document Processing
-    async processDocuments() {
-        const textInput = document.getElementById('textInput').value.trim();
-        const urlInput = document.getElementById('urlInput').value.trim();
-        
-        if (!textInput && !urlInput) {
-            this.showStatus('Voeg tekst of een URL toe om te verwerken', 'error');
-            return;
-        }
-
-        this.showStatus('Documenten worden verwerkt...', 'loading');
-
-        try {
-            let content = '';
-            let source = '';
-
-            if (textInput) {
-                content = textInput;
-                source = 'Handmatig toegevoegde tekst';
-            }
-
-            if (urlInput) {
-                const urlContent = await this.scrapeUrlWithSubdomains(urlInput);
-                content += (content ? '\n\n' : '') + urlContent;
-                source = urlInput;
-            }
-
-            // Store in knowledge base
-            const knowledgeItem = {
-                id: Date.now().toString(),
-                content: content,
-                source: source,
-                timestamp: new Date().toISOString()
-            };
-
-            this.knowledgeBase.push(knowledgeItem);
-            this.saveKnowledgeBase();
-            this.updateKnowledgeDisplay();
-
-            // Clear inputs
-            document.getElementById('textInput').value = '';
-            document.getElementById('urlInput').value = '';
-
-            this.showStatus('Documenten succesvol verwerkt!', 'success');
-        } catch (error) {
-            this.showStatus(`Fout bij verwerken: ${error.message}`, 'error');
-        }
-    }
-
-    async addUrl() {
-        const urlInput = document.getElementById('urlInput').value.trim();
-        if (!urlInput) {
-            this.showStatus('Voer een geldige URL in', 'error');
-            return;
-        }
-
-        this.showStatus('URL en subdomains worden verwerkt...', 'loading');
-
-        try {
-            const content = await this.scrapeUrlWithSubdomains(urlInput);
-            
-            const knowledgeItem = {
-                id: Date.now().toString(),
-                content: content,
-                source: urlInput,
-                timestamp: new Date().toISOString()
-            };
-
-            this.knowledgeBase.push(knowledgeItem);
-            this.saveKnowledgeBase();
-            this.updateKnowledgeDisplay();
-
-            document.getElementById('urlInput').value = '';
-            this.showStatus('URL en subdomains succesvol toegevoegd!', 'success');
-        } catch (error) {
-            this.showStatus(`Fout bij URL verwerken: ${error.message}`, 'error');
-        }
-    }
-
-    // Web Scraping with Subdomain Support
-    async scrapeUrlWithSubdomains(url) {
-        try {
-            const mainContent = await this.scrapeUrl(url);
-            const subdomainContent = await this.scrapeSubdomains(url);
-            
-            return mainContent + (subdomainContent ? '\n\n--- SUBDOMAINS ---\n\n' + subdomainContent : '');
-        } catch (error) {
-            throw new Error(`Fout bij ophalen van URL en subdomains: ${error.message}`);
-        }
-    }
-
-    // Web Scraping (using CORS proxy)
-    async scrapeUrl(url) {
-        try {
-            // Try multiple CORS proxy services
-            const proxies = [
-                `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
-                `https://cors-anywhere.herokuapp.com/${url}`,
-                `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
-            ];
-            
-            let lastError = null;
-            
-            for (let proxyUrl of proxies) {
-                try {
-                    const response = await fetch(proxyUrl);
-                    
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}`);
-                    }
-                    
-                    let data;
-                    if (proxyUrl.includes('allorigins.win')) {
-                        data = await response.json();
-                        if (!data.contents) {
-                            throw new Error('Geen inhoud in response');
-                        }
-                        data = data.contents;
-                    } else {
-                        data = await response.text();
-                    }
-
-                    // Simple HTML to text conversion
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(data, 'text/html');
-                    
-                    // Remove script and style elements
-                    const scripts = doc.querySelectorAll('script, style, nav, header, footer');
-                    scripts.forEach(el => el.remove());
-                    
-                    // Get text content
-                    const text = doc.body.textContent || doc.body.innerText || '';
-                    
-                    // Clean up text
-                    const cleanText = text.replace(/\s+/g, ' ').trim().substring(0, 5000);
-                    
-                    if (cleanText.length > 100) {
-                        return cleanText;
-                    }
-                } catch (error) {
-                    lastError = error;
-                    console.log(`Proxy failed: ${proxyUrl} - ${error.message}`);
-                    continue;
-                }
-            }
-            
-            throw new Error(`Alle proxies gefaald. Laatste fout: ${lastError?.message || 'Onbekende fout'}`);
-        } catch (error) {
-            throw new Error(`Fout bij ophalen van URL: ${error.message}`);
-        }
-    }
-
-    // Scrape common subdomains
-    async scrapeSubdomains(url) {
-        try {
-            const urlObj = new URL(url);
-            const domain = urlObj.hostname;
-            const protocol = urlObj.protocol;
-            
-            // Only check most common subdomains
-            const commonSubdomains = ['www', 'blog', 'docs'];
-            
-            let subdomainContent = '';
-            let foundSubdomains = 0;
-            
-            // Limit to 2 subdomains to avoid overwhelming
-            for (let subdomain of commonSubdomains.slice(0, 2)) {
-                try {
-                    const subdomainUrl = `${protocol}//${subdomain}.${domain}`;
-                    console.log(`Trying subdomain: ${subdomainUrl}`);
-                    
-                    const content = await this.scrapeUrl(subdomainUrl);
-                    
-                    if (content && content.length > 100) {
-                        subdomainContent += `\n--- ${subdomain.toUpperCase()} ---\n${content}\n`;
-                        foundSubdomains++;
-                        console.log(`Successfully scraped: ${subdomainUrl}`);
-                    }
-                } catch (error) {
-                    console.log(`Subdomain failed: ${subdomain}.${domain} - ${error.message}`);
-                    // Subdomain doesn't exist or can't be accessed, continue
-                    continue;
-                }
-            }
-            
-            if (foundSubdomains > 0) {
-                console.log(`Found ${foundSubdomains} subdomains`);
-            }
-            
-            return subdomainContent;
-        } catch (error) {
-            console.log('Subdomain scraping failed:', error.message);
-            // If subdomain scraping fails, return empty string
-            return '';
-        }
-    }
-
-    // Q&A Functionality with Local AI
     async askQuestion() {
         const question = document.getElementById('questionInput').value.trim();
         
@@ -375,7 +90,7 @@ class LocalAIQASystem {
         }
 
         if (this.knowledgeBase.length === 0) {
-            this.showStatus('Voeg eerst documenten toe aan de kennisbank', 'error');
+            this.showStatus('Geen documenten beschikbaar in de kennisbank', 'error');
             return;
         }
 
@@ -388,7 +103,7 @@ class LocalAIQASystem {
         document.getElementById('askBtn').disabled = true;
 
         try {
-            const answer = await this.getLocalAIAnswer(question);
+            const answer = await this.getAIAnswer(question);
             this.displayAnswer(answer, question);
             this.showStatus('Antwoord gegenereerd!', 'success');
         } catch (error) {
@@ -398,14 +113,30 @@ class LocalAIQASystem {
         }
     }
 
-    async getLocalAIAnswer(question) {
+    async getAIAnswer(question) {
         try {
-            // Find the most relevant document using semantic similarity
-            const relevantDoc = await this.findMostRelevantDocumentSemantic(question);
+            // Use fast keyword matching first (fallback to AI if needed)
+            let relevantDoc = this.findMostRelevantDocument(question);
+            
+            // If keyword matching finds a good match, use it immediately
+            if (relevantDoc && this.calculateRelevanceScore(question, relevantDoc.content) > 2) {
+                const answer = this.extractAnswerFromText(question, relevantDoc.content);
+                return {
+                    answer: answer.text,
+                    confidence: answer.confidence,
+                    source: relevantDoc.source
+                };
+            }
+            
+            // Only use AI model if keyword matching fails
+            if (this.modelLoaded && this.model) {
+                console.log('Using AI model for better matching...');
+                relevantDoc = await this.findMostRelevantDocumentSemantic(question);
+            }
             
             if (!relevantDoc) {
                 return {
-                    answer: "Ik kan geen relevant antwoord vinden in de beschikbare documenten.",
+                    answer: "Ik kan geen relevant antwoord vinden in de beschikbare documenten over verkeersveiligheid.",
                     confidence: 0,
                     source: "Geen bron gevonden"
                 };
@@ -441,10 +172,14 @@ class LocalAIQASystem {
             let bestDoc = null;
             let bestScore = 0;
 
+            // Limit search to first 1000 documents for speed
+            const searchLimit = Math.min(1000, this.knowledgeBase.length);
+            const documentsToSearch = this.knowledgeBase.slice(0, searchLimit);
+
             // Compare with each document
-            for (let doc of this.knowledgeBase) {
-                // Get embeddings for document content (first 500 chars)
-                const docText = doc.content.substring(0, 500);
+            for (let doc of documentsToSearch) {
+                // Get embeddings for document content (first 300 chars for speed)
+                const docText = doc.content.substring(0, 300);
                 const docEmbedding = await this.model.embed([docText]);
                 
                 // Calculate cosine similarity
@@ -475,9 +210,34 @@ class LocalAIQASystem {
     }
 
     extractAnswerFromText(question, content) {
-        // Simple text extraction based on question keywords
+        // Smart answer extraction with context awareness
+        const questionLower = question.toLowerCase();
+        const contentLower = content.toLowerCase();
+        
+        // Define specific answer patterns for common questions
+        const answerPatterns = {
+            'snelheidslimiet': /(\d+)\s*km\/h|snelheidslimiet[^.]*?(\d+)[^.]*?km\/h|maximum[^.]*?(\d+)[^.]*?km\/h/gi,
+            'woonwijk': /woonwijk[^.]*?(\d+)[^.]*?km\/h|woonwijk[^.]*?snelheid[^.]*?(\d+)/gi,
+            'fiets': /fiets[^.]*?(\d+)[^.]*?km\/h|fiets[^.]*?snelheid[^.]*?(\d+)/gi,
+            'verkeerslicht': /verkeerslicht[^.]*?(\d+)[^.]*?seconde|verkeerslicht[^.]*?(\d+)[^.]*?minuut/gi
+        };
+        
+        // Try to find specific answers first
+        for (let [key, pattern] of Object.entries(answerPatterns)) {
+            if (questionLower.includes(key)) {
+                const match = pattern.exec(content);
+                if (match) {
+                    return {
+                        text: `Gevonden informatie: ${match[0]}`,
+                        confidence: 0.8
+                    };
+                }
+            }
+        }
+        
+        // Fallback to sentence-based extraction
         const questionWords = question.toLowerCase().split(/\s+/).filter(word => word.length > 3);
-        const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 10);
+        const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 20);
         
         let bestSentence = '';
         let bestScore = 0;
@@ -486,6 +246,12 @@ class LocalAIQASystem {
             const sentenceLower = sentence.toLowerCase();
             let score = 0;
             
+            // Boost score for traffic safety terms
+            const trafficTerms = ['snelheid', 'limiet', 'km/h', 'verkeer', 'weg', 'fiets', 'voetganger'];
+            const hasTrafficTerms = trafficTerms.some(term => sentenceLower.includes(term));
+            if (hasTrafficTerms) score += 2;
+            
+            // Regular keyword matching
             for (let word of questionWords) {
                 if (sentenceLower.includes(word)) {
                     score += 1;
@@ -498,27 +264,45 @@ class LocalAIQASystem {
             }
         }
         
-        if (bestSentence) {
+        if (bestSentence && bestScore > 0) {
             return {
                 text: bestSentence,
                 confidence: Math.min(bestScore / questionWords.length, 1)
             };
         }
         
-        // Fallback: return first few sentences
-        const fallback = sentences.slice(0, 2).join('. ').trim();
+        // Final fallback
         return {
-            text: fallback || "Geen specifiek antwoord gevonden in de tekst.",
-            confidence: 0.3
+            text: "Ik kan geen specifiek antwoord vinden in de beschikbare documenten. Probeer een andere vraag of controleer of de documenten de juiste informatie bevatten.",
+            confidence: 0.1
         };
     }
 
     findMostRelevantDocument(question) {
-        // Simple relevance scoring based on keyword matching
+        // Smart document filtering - prioritize traffic safety documents
         let bestDoc = null;
         let bestScore = 0;
+        
+        // First, try to find documents that are clearly about traffic safety
+        const trafficSafetyDocs = this.knowledgeBase.filter(doc => {
+            const source = doc.source.toLowerCase();
+            const content = doc.content.toLowerCase();
+            
+            // Look for traffic safety related source names
+            const trafficSources = ['vademecum', 'verkeer', 'weg', 'fiets', 'voetganger', 'schoolomgeving', 'verkeerslicht', 'signalisatie'];
+            const hasTrafficSource = trafficSources.some(term => source.includes(term));
+            
+            // Look for traffic safety content
+            const trafficContent = ['snelheid', 'verkeer', 'weg', 'fiets', 'voetganger', 'verkeerslicht', 'drempel', 'voorrang'];
+            const hasTrafficContent = trafficContent.some(term => content.includes(term));
+            
+            return hasTrafficSource || hasTrafficContent;
+        });
+        
+        // Search traffic safety documents first
+        const docsToSearch = trafficSafetyDocs.length > 0 ? trafficSafetyDocs : this.knowledgeBase.slice(0, 200);
 
-        for (let doc of this.knowledgeBase) {
+        for (let doc of docsToSearch) {
             const score = this.calculateRelevanceScore(question, doc.content);
             if (score > bestScore) {
                 bestScore = score;
@@ -531,17 +315,38 @@ class LocalAIQASystem {
 
     calculateRelevanceScore(question, content) {
         const questionWords = question.toLowerCase().split(/\s+/);
-        const contentWords = content.toLowerCase().split(/\s+/);
+        const contentLower = content.toLowerCase();
         
         let score = 0;
+        
+        // Boost score for traffic safety related terms
+        const trafficTerms = ['snelheid', 'limiet', 'woonwijk', 'verkeer', 'veiligheid', 'weg', 'fiets', 'voetganger', 'verkeerslicht', 'drempel', 'voorrang', 'regel'];
+        const questionHasTrafficTerms = questionWords.some(word => trafficTerms.includes(word));
+        
+        if (questionHasTrafficTerms) {
+            // Check if content also has traffic safety terms
+            const contentHasTrafficTerms = trafficTerms.some(term => contentLower.includes(term));
+            if (contentHasTrafficTerms) {
+                score += 10; // Big boost for traffic safety content
+            }
+        }
+        
+        // Regular keyword matching
         for (let word of questionWords) {
-            if (word.length > 3) { // Ignore short words
-                const matches = contentWords.filter(w => w.includes(word)).length;
+            if (word.length > 3) {
+                const matches = (contentLower.match(new RegExp(word, 'g')) || []).length;
                 score += matches;
             }
         }
         
-        return score;
+        // Penalty for irrelevant content
+        const irrelevantTerms = ['arbeidswetgeving', 'concentratie', 'hulpdiensten', 'onderhoud', 'interventie'];
+        const hasIrrelevantTerms = irrelevantTerms.some(term => contentLower.includes(term));
+        if (hasIrrelevantTerms) {
+            score -= 5;
+        }
+        
+        return Math.max(0, score);
     }
 
     displayAnswer(answer, question) {
@@ -570,45 +375,8 @@ class LocalAIQASystem {
         answerArea.classList.add('show');
     }
 
-    // Knowledge Base Management
-    loadKnowledgeBase() {
-        const stored = localStorage.getItem('local_ai_qa_knowledge');
-        return stored ? JSON.parse(stored) : [];
-    }
-
-    saveKnowledgeBase() {
-        localStorage.setItem('local_ai_qa_knowledge', JSON.stringify(this.knowledgeBase));
-    }
-
-    updateKnowledgeDisplay() {
-        const knowledgeList = document.getElementById('knowledgeList');
-        
-        if (this.knowledgeBase.length === 0) {
-            knowledgeList.innerHTML = '<p>Nog geen documenten toegevoegd. Voeg tekst of URLs toe om te beginnen.</p>';
-            return;
-        }
-
-        knowledgeList.innerHTML = this.knowledgeBase.map(item => `
-            <div class="knowledge-item">
-                <div>
-                    <h4>${item.source}</h4>
-                    <p>${item.content.substring(0, 100)}${item.content.length > 100 ? '...' : ''}</p>
-                    <div class="source">Toegevoegd: ${new Date(item.timestamp).toLocaleString()}</div>
-                </div>
-                <button class="delete-btn" onclick="localAI.deleteKnowledgeItem('${item.id}')">Verwijder</button>
-            </div>
-        `).join('');
-    }
-
-    deleteKnowledgeItem(id) {
-        this.knowledgeBase = this.knowledgeBase.filter(item => item.id !== id);
-        this.saveKnowledgeBase();
-        this.updateKnowledgeDisplay();
-        this.showStatus('Document verwijderd', 'success');
-    }
-
     showStatus(message, type) {
-        const status = document.getElementById('status');
+        const status = document.getElementById('modelStatus');
         status.textContent = message;
         status.className = `status ${type}`;
         
@@ -616,9 +384,17 @@ class LocalAIQASystem {
             setTimeout(() => {
                 status.style.display = 'none';
             }, 3000);
+        } else {
+            status.style.display = 'block';
         }
     }
 }
 
+// Global function for example questions
+function fillQuestion(question) {
+    document.getElementById('questionInput').value = question;
+    document.getElementById('questionInput').focus();
+}
+
 // Initialize the system
-const localAI = new LocalAIQASystem();
+const veiligheidQA = new VeiligheidQA();

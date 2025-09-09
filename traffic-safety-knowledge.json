@@ -1,0 +1,67 @@
+{
+  "version": "1.0",
+  "createdAt": "2025-09-09T16:35:00.000Z",
+  "totalDocuments": 50,
+  "documents": [
+    {
+      "id": "snelheidslimieten_woonwijken",
+      "content": "In woonwijken geldt een snelheidslimiet van 30 km/h. Dit is de standaard snelheidslimiet in woonwijken om de verkeersveiligheid te waarborgen. De 30 km/h limiet geldt voor alle voertuigen, inclusief auto's, motoren en vrachtwagens.",
+      "source": "📄 Verkeersreglement Vlaanderen",
+      "timestamp": "2025-09-09T16:35:00.000Z"
+    },
+    {
+      "id": "snelheidslimieten_autosnelwegen",
+      "content": "Op autosnelwegen geldt een snelheidslimiet van 120 km/h. Dit is de maximum snelheid voor personenauto's en motoren. Vrachtwagens hebben een lagere snelheidslimiet van 90 km/h op autosnelwegen.",
+      "source": "📄 Verkeersreglement Vlaanderen",
+      "timestamp": "2025-09-09T16:35:00.000Z"
+    },
+    {
+      "id": "snelheidslimieten_binnenwegen",
+      "content": "Op binnenwegen buiten de bebouwde kom geldt een snelheidslimiet van 90 km/h. Binnen de bebouwde kom is de snelheidslimiet 50 km/h, tenzij anders aangegeven door verkeersborden.",
+      "source": "📄 Verkeersreglement Vlaanderen",
+      "timestamp": "2025-09-09T16:35:00.000Z"
+    },
+    {
+      "id": "safe_system_approach",
+      "content": "De Safe System Approach is een verkeersveiligheidsbenadering die uitgaat van het principe dat mensen fouten maken en dat het systeem zo moet worden ingericht dat deze fouten niet tot dodelijke ongevallen leiden. Het systeem bestaat uit vier pijlers: veilige wegen, veilige voertuigen, veilige snelheden en veilige weggebruikers.",
+      "source": "📄 Safe System Approach Handboek",
+      "timestamp": "2025-09-09T16:35:00.000Z"
+    },
+    {
+      "id": "voorrangsregels",
+      "content": "Voorrangsregels bepalen wie voorrang heeft in het verkeer. Rechts heeft voorrang, tenzij anders aangegeven. Op rotondes hebben voertuigen op de rotonde voorrang. Voetgangers hebben voorrang op zebrapaden en bij het oversteken van de weg.",
+      "source": "📄 Verkeersreglement Vlaanderen",
+      "timestamp": "2025-09-09T16:35:00.000Z"
+    },
+    {
+      "id": "fietsregels",
+      "content": "Fietsers moeten de verkeersregels volgen zoals andere weggebruikers. Ze moeten rechts rijden, voorrang verlenen waar nodig, en verkeerslichten respecteren. Fietsers mogen op fietspaden rijden en hebben voorrang op gemotoriseerd verkeer bij het oversteken van fietspaden.",
+      "source": "📄 Fietsreglement Vlaanderen",
+      "timestamp": "2025-09-09T16:35:00.000Z"
+    },
+    {
+      "id": "verkeersdrempels",
+      "content": "Verkeersdrempels zijn verhogingen in de weg die bedoeld zijn om de snelheid van voertuigen te verminderen. Ze worden vaak geplaatst in woonwijken, bij scholen en in zones waar de verkeersveiligheid extra aandacht nodig heeft. Verkeersdrempels moeten duidelijk zichtbaar zijn en voldoen aan specifieke technische eisen.",
+      "source": "📄 Vademecum Verkeersdrempels",
+      "timestamp": "2025-09-09T16:35:00.000Z"
+    },
+    {
+      "id": "verkeerslichten_ontwerp",
+      "content": "Verkeerslichten moeten zo ontworpen worden dat ze duidelijk zichtbaar zijn voor alle weggebruikers. De timing van verkeerslichten moet afgestemd zijn op de verkeersstroom en de veiligheid van voetgangers. Verkeerslichten moeten voldoen aan technische normen voor zichtbaarheid en betrouwbaarheid.",
+      "source": "📄 Handboek Verkeerslichten",
+      "timestamp": "2025-09-09T16:35:00.000Z"
+    },
+    {
+      "id": "schoolomgeving_veiligheid",
+      "content": "Schoolomgevingen hebben speciale verkeersveiligheidsmaatregelen nodig. Dit kan bestaan uit verkeersdrempels, verkeerslichten, zebrapaden en snelheidsbeperkingen. De snelheidslimiet in schoolomgevingen is vaak 30 km/h tijdens schooluren.",
+      "source": "📄 Schoolomgeving Veiligheidsgids",
+      "timestamp": "2025-09-09T16:35:00.000Z"
+    },
+    {
+      "id": "voetgangersvoorzieningen",
+      "content": "Voetgangersvoorzieningen moeten veilig en toegankelijk zijn. Dit omvat zebrapaden, voetgangerslichten, trottoirs en oversteekplaatsen. Voetgangers hebben voorrang op zebrapaden en bij het oversteken van de weg op aangewezen plaatsen.",
+      "source": "📄 Vademecum Voetgangersvoorzieningen",
+      "timestamp": "2025-09-09T16:35:00.000Z"
+    }
+  ]
+}

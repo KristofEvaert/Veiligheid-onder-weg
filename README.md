@@ -1,120 +1,135 @@
-# Local AI Q&A Systeem
+# Veiligheid op de Weg - AI Q&A Systeem
 
-Een volledig offline AI Q&A applicatie die werkt met je eigen documenten en websites. Geen API keys, geen server deployment nodig!
+Een lokaal AI-aangedreven vraag-en-antwoord systeem voor verkeersveiligheid documenten. Het systeem werkt volledig offline en gebruikt TensorFlow.js voor intelligente documentverwerking.
 
-## 🚀 Features
+## 🚀 Snelle Start
 
-- **Volledig Offline**: AI model draait lokaal in je browser
-- **Geen API Kosten**: Volledig gratis na eerste download
-- **Privacy**: Geen data naar externe servers
-- **Document Upload**: PDF, TXT, DOC bestanden + URLs
-- **Web Scraping**: Haalt automatisch informatie van websites op
-- **Local Storage**: Bewaart je kennisbank lokaal in de browser
+### 1. Installeer Dependencies
+```bash
+npm install
+```
+
+### 2. Plaats je PDF bestanden
+- Maak een `pdfs` folder aan in de project root
+- Plaats alle PDF bestanden over verkeersveiligheid in deze folder
+
+### 3. Bouw de Kennisbank
+```bash
+npm run build
+```
+Dit proces:
+- Leest alle PDF bestanden uit de `pdfs` folder
+- Extraheert tekst uit elke PDF
+- Splitst de tekst in beheersbare chunks
+- Slaat alles op in `knowledge-base.json`
+
+### 4. Start de Q&A Interface
+```bash
+npm start
+```
+- Open http://localhost:3000 in je browser
+- Stel vragen over verkeersveiligheid!
+
+## 📁 Project Structuur
+
+```
+veiligheidopde weg/
+├── pdfs/                    # Plaats hier je PDF bestanden
+├── knowledge-base.json      # Gegenereerde kennisbank (na build)
+├── build-knowledge.js       # Script om PDFs te verwerken
+├── server.js               # Express server voor Q&A interface
+├── qa-interface.html       # Schone Q&A interface
+├── qa-script.js           # AI logica voor Q&A
+├── qa-styles.css          # Styling voor Q&A interface
+└── package.json           # Dependencies
+```
+
+## 🎯 Features
+
+- **Volledig Offline**: Geen API keys of internetverbinding nodig
+- **PDF Verwerking**: Automatische tekst extractie uit PDF bestanden
+- **Semantische Zoekfunctie**: Gebruikt Universal Sentence Encoder voor intelligente matching
+- **Schone Interface**: Focus op Q&A zonder upload functionaliteit
+- **Voorbeeld Vragen**: Voorgestelde vragen om te beginnen
 - **Responsive Design**: Werkt op desktop en mobiel
-- **Static Deployment**: Alleen HTML, CSS, JavaScript - geen server nodig!
-
-## 📋 Vereisten
-
-- **Geen API keys nodig!**
-- **Eerste download**: ~250MB AI model (eenmalig)
-- **Moderne browser**: Chrome, Firefox, Safari, Edge
-- **Internet**: Alleen voor eerste model download
-
-## 🛠️ Installatie & Gebruik
-
-### Optie 1: Direct Gebruiken
-1. Download alle bestanden (`index.html`, `styles.css`, `script.js`)
-2. Open `index.html` in je browser
-3. Wacht tot het AI model is gedownload (~250MB)
-4. Begin met het toevoegen van documenten!
-
-### Optie 2: GitHub Pages Deployment
-1. Upload bestanden naar een GitHub repository
-2. Ga naar Settings > Pages
-3. Selecteer "Deploy from a branch" > "main"
-4. Je site is live op `https://[username].github.io/[repository-name]`
-
-### Optie 3: Netlify Deployment
-1. Sleep de bestanden naar https://app.netlify.com/drop
-2. Je site krijgt automatisch een URL
-3. Optioneel: verbind met GitHub voor automatische updates
-
-## 💡 Hoe het Werkt
-
-1. **AI Model Laden**:
-   - Bij eerste gebruik wordt het AI model gedownload (~250MB)
-   - Model wordt lokaal opgeslagen in je browser
-   - Daarna werkt alles volledig offline
-
-2. **Documenten Toevoegen**:
-   - Upload PDF, TXT, DOC bestanden
-   - Plak tekst in het tekstveld
-   - Of voeg URLs toe voor automatische scraping
-   - Klik "Verwerk Documenten"
-
-3. **Vragen Stellen**:
-   - Type je vraag in het vraagveld
-   - Klik "Vraag Stellen" of Ctrl+Enter
-   - Lokale AI geeft antwoord gebaseerd op je documenten
-
-4. **Kennisbank Beheren**:
-   - Bekijk alle toegevoegde documenten
-   - Verwijder documenten die je niet meer nodig hebt
 
 ## 🔧 Technische Details
 
-- **Frontend**: Pure HTML, CSS, JavaScript (geen frameworks)
-- **AI Model**: TensorFlow.js met Universal Sentence Encoder
-- **Storage**: Browser localStorage voor persistentie
-- **Web Scraping**: CORS proxy voor URL scraping
-- **PDF Support**: PDF.js voor tekst extractie
-- **Responsive**: Mobile-first design
+- **AI Model**: Universal Sentence Encoder (TensorFlow.js)
+- **PDF Verwerking**: pdf-parse (Node.js) voor betere compatibiliteit
+- **Backend**: Express.js server
+- **Frontend**: Vanilla JavaScript met TensorFlow.js
+- **Data**: JSON-gebaseerde kennisbank
 
-## 🔒 Privacy & Security
+## 📝 Gebruik
 
-- **Volledig Offline**: Geen data naar externe servers
-- **Lokale AI**: Alle verwerking gebeurt in je browser
-- **Geen Tracking**: Geen analytics of tracking
-- **Lokale Opslag**: Documenten blijven in je browser
-- **Geen API Keys**: Geen externe credentials nodig
+### Kennisbank Bouwen
+```bash
+# Plaats PDFs in pdfs/ folder, dan:
+npm run build
+```
+
+### Server Starten
+```bash
+npm start
+# Open http://localhost:3000
+```
+
+### Voorbeeld Vragen
+- "Wat zijn de snelheidslimieten in woonwijken?"
+- "Wanneer moet je voorrang verlenen?"
+- "Wat zijn de regels voor fietsers?"
+- "Hoe werkt de verkeersdrempel?"
+
+## 🔄 Workflow
+
+1. **Voorbereiding**: Plaats PDF bestanden in `pdfs/` folder
+2. **Build**: Run `npm run build` om kennisbank te genereren
+3. **Deploy**: Run `npm start` om server te starten
+4. **Gebruik**: Open browser en stel vragen!
+
+## 🛠️ Aanpassingen
+
+### Nieuwe PDFs Toevoegen
+1. Plaats nieuwe PDF bestanden in `pdfs/` folder
+2. Run `npm run build` opnieuw
+3. Server herstarten met `npm start`
+
+### Styling Aanpassen
+- Bewerk `qa-styles.css` voor visuele aanpassingen
+- Kleuren en thema's kunnen eenvoudig worden gewijzigd
+
+## 🔒 Privacy & Beveiliging
+
+- Alle verwerking gebeurt lokaal
+- Geen data wordt naar externe servers gestuurd
+- PDF bestanden blijven op je eigen server
+- Volledige controle over je data
+
+## 🌐 Browser Compatibiliteit
+
+- Chrome/Edge: Volledige ondersteuning
+- Firefox: Volledige ondersteuning
+- Safari: Volledige ondersteuning
+- Mobiele browsers: Ondersteund
 
 ## 🆘 Troubleshooting
 
+**"Knowledge base not found"**:
+- Run eerst `npm run build` om de kennisbank te genereren
+- Zorg dat er PDF bestanden in de `pdfs/` folder staan
+
+**"No PDF files found"**:
+- Plaats PDF bestanden in de `pdfs/` folder
+- Zorg dat bestanden de `.pdf` extensie hebben
+
 **"Model download fout"**:
-- Controleer je internetverbinding
+- Controleer je internetverbinding voor eerste download
 - Probeer de pagina te refreshen
-- Zorg dat je browser up-to-date is
-
-**"CORS Error" bij URL scraping**:
-- Sommige websites blokkeren scraping
-- Probeer een andere URL of voeg tekst handmatig toe
-
-**"Geen antwoord"**:
-- Zorg dat je documenten hebt toegevoegd
-- Stel specifiekere vragen
-- Controleer of je vraag relevant is voor je documenten
-- Wacht tot het AI model volledig is geladen
 
 ## 💰 Kosten
 
 - **Volledig Gratis**: Geen API kosten
-- **Eerste Download**: ~250MB (eenmalig)
+- **Eerste Download**: ~250MB AI model (eenmalig)
 - **Offline Gebruik**: Onbeperkt na download
 - **Geen Abonnement**: Geen maandelijkse kosten
-
-## 🎯 Gebruik Cases
-
-- **Onderzoek**: Q&A over wetenschappelijke papers
-- **Bedrijfsdocumenten**: Vragen over procedures en policies
-- **Educatie**: Studiehulp met eigen materiaal
-- **Content Creatie**: Research voor artikelen en blogs
-- **Persoonlijke Kennisbank**: Organiseer en doorzoek je eigen informatie
-
-## 🔄 Updates
-
-Deze applicatie is volledig client-side, dus updates vereisen:
-1. Download nieuwe bestanden
-2. Vervang oude bestanden
-3. Refresh je browser
-
-Of bij GitHub Pages/Netlify: push nieuwe commits voor automatische updates.
